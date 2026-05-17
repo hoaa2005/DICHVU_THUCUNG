@@ -1,0 +1,237 @@
+{% extends "layout_admin.html" %}
+
+{% block admin_content %}
+<div class="max-w-7xl mx-auto space-y-6">
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+            <h2 class="text-xl font-black text-slate-800 tracking-tight">Quản lý phân quyền tài khoản</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Quản lý danh sách cấp quyền Admin, Nhân viên và Khách hàng hệ thống</p>
+        </div>
+        <button onclick="openAddModal()" class="bg-blue-600 text-white px-4 py-2.5 rounded-xl font-bold text-xs shadow-md shadow-blue-500/10 hover:bg-blue-700 transition-all flex items-center gap-2">
+            <i data-lucide="user-plus" class="w-4 h-4"></i> Cấp tài khoản mới
+        </button>
+    </div>
+
+    <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm flex items-center">
+        <form method="GET" action="/admin/accounts" class="w-full flex gap-3">
+            <div class="relative flex-1">
+                <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                <input type="text" name="search" value="{{ search_query }}" placeholder="Tìm kiếm theo tên đăng nhập hoặc vai trò..." class="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 text-xs focus:outline-none focus:border-blue-500">
+            </div>
+            <button type="submit" class="bg-slate-900 text-white px-5 py-2 rounded-xl text-xs font-bold hover:bg-slate-800 transition-all">Lọc dữ liệu</button>
+        </form>
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto text-xs">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 text-slate-400 font-bold uppercase border-b border-slate-100">
+                        <th class="py-3.5 px-6">Mã TK</th>
+                        <th class="py-3.5 px-6">Tên đăng nhập</th>
+                        <th class="py-3.5 px-6">Vai trò chức vụ</th>
+                        <th class="py-3.5 px-6">Trạng thái vận hành</th>
+                        <th class="py-3.5 px-6 text-right">Hành động mẫu</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-semibold text-slate-600">
+                    {% for acc in accounts %}
+                    <tr class="hover:bg-slate-50/50 transition-colors">
+                        <td class="py-4 px-6 font-bold text-slate-900">#{{ acc.maTK }}</td>
+                        <td class="py-4 px-6">{{ acc.tenDangNhap }}</td>
+                        <td class="py-4 px-6">
+                            {% if acc.vaiTro|lower == 'admin' %}
+                            <span class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-purple-50 text-purple-600 border border-purple-100">System Admin</span>
+                            {% elif acc.vaiTro|lower == 'nhân viên' %}
+                            <span class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-blue-50 text-blue-600 border border-blue-100">Staff Nhân viên</span>
+                            {% else %}
+                            <span class="px-2.5 py-1 rounded-lg text-[10px] font-bold bg-slate-100 text-slate-600">Khách hàng</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-4 px-6">
+                            {% if acc.trangThai == 'Hoạt động' or acc.trangThai is none %}
+                            <span class="flex items-center gap-1.5 text-emerald-600 font-bold"><span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Đang chạy</span>
+                            {% else %}
+                            <span class="flex items-center gap-1.5 text-rose-500 font-bold"><span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Bị khóa</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-4 px-6 text-right space-x-1.5">
+                            <button onclick="openEditModal('{{ acc.maTK }}', '{{ acc.vaiTro }}', '{{ acc.trangThai }}')" class="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors inline-flex"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                            <button onclick="deleteAccount('{{ acc.maTK }}')" class="p-1.5 text-rose-500 hover:bg-rose-50 rounded-lg transition-colors inline-flex"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="5" class="text-center py-10 text-slate-400 font-bold">Không tìm thấy tài khoản nào trùng khớp.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="addModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 hidden opacity-0 transition-all duration-300">
+    <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl space-y-4">
+        <div class="flex justify-between items-center border-b pb-3">
+            <h3 class="font-black text-slate-800 text-sm">Cấp tài khoản hệ thống mới</h3>
+            <button onclick="closeAddModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <div class="space-y-3 text-xs font-bold text-slate-700">
+            <div>
+                <label class="block mb-1">Họ và tên chủ tài khoản</label>
+                <input id="addFullName" type="text" class="w-full px-3 py-2 border rounded-xl font-medium focus:outline-none focus:border-blue-500">
+            </div>
+            <div>
+                <label class="block mb-1">Tên đăng nhập (Username)</label>
+                <input id="addUsername" type="text" class="w-full px-3 py-2 border rounded-xl font-medium focus:outline-none focus:border-blue-500">
+            </div>
+            <div>
+                <label class="block mb-1">Mật khẩu khởi tạo</label>
+                <input id="addPassword" type="password" class="w-full px-3 py-2 border rounded-xl font-medium focus:outline-none focus:border-blue-500">
+            </div>
+            <div class="grid grid-cols-2 gap-3">
+                <div>
+                    <label class="block mb-1">Phân vai trò</label>
+                    <select id="addRole" class="w-full px-3 py-2 border rounded-xl font-medium focus:outline-none focus:border-blue-500">
+                        <option value="Khách hàng">Khách hàng</option>
+                        <option value="Nhân viên">Nhân viên</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block mb-1">Trạng thái ban đầu</label>
+                    <select id="addStatus" class="w-full px-3 py-2 border rounded-xl font-medium focus:outline-none focus:border-blue-500">
+                        <option value="Hoạt động">Hoạt động</option>
+                        <option value="Bị khóa">Bị khóa</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-2 border-t">
+            <button onclick="closeAddModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs">Hủy bỏ</button>
+            <button onclick="submitAddAccount()" class="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs">Lưu hệ thống</button>
+        </div>
+    </div>
+</div>
+
+<div id="editModal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 hidden opacity-0 transition-all duration-300">
+    <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl space-y-4">
+        <div class="flex justify-between items-center border-b pb-3">
+            <h3 class="font-black text-slate-800 text-sm">Chỉnh sửa thông tin phân quyền</h3>
+            <button onclick="closeEditModal()" class="text-slate-400 hover:text-slate-600"><i data-lucide="x" class="w-4 h-4"></i></button>
+        </div>
+        <input type="hidden" id="editId">
+        <div class="space-y-3 text-xs font-bold text-slate-700">
+            <div>
+                <label class="block mb-1">Mật khẩu mới (Để trống nếu không đổi)</label>
+                <input id="editPassword" type="password" placeholder="••••••••" class="w-full px-3 py-2 border rounded-xl font-medium focus:outline-none focus:border-blue-500">
+            </div>
+            <div>
+                <label class="block mb-1">Thay đổi vai trò</label>
+                <select id="editRole" class="w-full px-3 py-2 border rounded-xl font-medium focus:outline-none focus:border-blue-500">
+                    <option value="Khách hàng">Khách hàng</option>
+                    <option value="Nhân viên">Nhân viên</option>
+                    <option value="admin">Admin</option>
+                </select>
+            </div>
+            <div>
+                <label class="block mb-1">Trạng thái hoạt động</label>
+                <select id="editStatus" class="w-full px-3 py-2 border rounded-xl font-medium focus:outline-none focus:border-blue-500">
+                    <option value="Hoạt động">Hoạt động</option>
+                    <option value="Bị khóa">Bị khóa</option>
+                </select>
+            </div>
+        </div>
+        <div class="flex justify-end gap-2 pt-2 border-t">
+            <button onclick="closeEditModal()" class="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-xs">Hủy</button>
+            <button onclick="submitEditAccount()" class="px-4 py-2 bg-blue-600 text-white rounded-xl text-xs">Cập nhật ngay</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // JS Logic đóng mở Modal mượt mà
+   // Sửa lại đoạn JavaScript ở cuối file templates/admin_accounts.html
+
+const addM = document.getElementById('addModal');
+const editM = document.getElementById('editModal');
+
+// Đổi từ def thành function
+function openAddModal() { 
+    addM.classList.remove('hidden'); 
+    setTimeout(() => addM.classList.remove('opacity-0'), 10); 
+}
+
+function closeAddModal() { 
+    addM.classList.add('opacity-0'); 
+    setTimeout(() => addM.classList.add('hidden'), 300); 
+}
+
+function openEditModal(id, role, status) {
+    document.getElementById('editId').value = id;
+    document.getElementById('editRole').value = role;
+    document.getElementById('editStatus').value = status;
+    editM.classList.remove('hidden'); 
+    setTimeout(() => editM.classList.remove('opacity-0'), 10);
+}
+
+function closeEditModal() { 
+    editM.classList.add('opacity-0'); 
+    setTimeout(() => editM.classList.add('hidden'), 300); 
+}
+
+// Gọi API thêm mới bằng Fetch
+function submitAddAccount() {
+    const payload = {
+        full_name: document.getElementById('addFullName').value,
+        username: document.getElementById('addUsername').value,
+        password:  document.getElementById('addPassword').value,
+        role: document.getElementById('addRole').value,
+        status: document.getElementById('addStatus').value
+    };
+
+    fetch('/api/admin/accounts', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message);
+        if(data.status === 'success') window.location.reload();
+    });
+}
+
+// Gọi API cập nhật
+function submitEditAccount() {
+    const id = document.getElementById('editId').value;
+    const payload = {
+        password: document.getElementById('editPassword').value,
+        role: document.getElementById('editRole').value,
+        status: document.getElementById('editStatus').value
+    };
+
+    fetch(`/api/admin/accounts/${id}`, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+    })
+    .then(res => res.json())
+    .then(data => {
+        alert(data.message);
+        if(data.status === 'success') window.location.reload();
+    });
+}
+
+// Gọi API xóa tài khoản vĩnh viễn
+function deleteAccount(id) {
+    if(confirm('Cảnh báo hệ thống: Bạn chắc chắn muốn xóa vĩnh viễn tài khoản này?')) {
+        fetch(`/api/admin/accounts/${id}`, { method: 'DELETE' })
+        .then(res => res.json())
+        .then(data => {
+            alert(data.message);
+            if(data.status === 'success') window.location.reload();
+        });
+    }
+}
+</script>
+{% endblock %}

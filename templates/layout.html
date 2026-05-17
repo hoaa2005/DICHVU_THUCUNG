@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="vi" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PetCare - Dịch Vụ Thú Cưng</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.263.0/dist/umd/lucide.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Nunito', sans-serif; }
+    .fade-up { opacity: 0; transform: translateY(20px); animation: fadeUp 0.6s ease forwards; }
+    @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
+    .service-card:hover { transform: translateY(-6px); box-shadow: 0 12px 30px rgba(147,197,253,0.3); }
+    .service-card { transition: all 0.3s ease; }
+    .nav-link { position: relative; }
+    .nav-link::after { content: ''; position: absolute; bottom: -2px; left: 0; width: 0; height: 2px; background: #3b82f6; transition: width 0.3s; }
+    .nav-link:hover::after { width: 100%; }
+    
+    /* Hiệu ứng focus cho thanh tìm kiếm */
+    .search-input:focus + .search-icon { color: #3b82f6; }
+  </style>
+</head>
+<body class="h-full overflow-auto bg-blue-50">
+
+  <header class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+      
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <div class="w-10 h-10 bg-blue-200 rounded-full flex items-center justify-center"><span class="text-xl">🐾</span></div>
+        <span class="text-xl font-800 text-blue-600 hidden sm:block">PetCare</span>
+      </div>
+
+      <div class="flex-1 max-w-md relative group">
+        <input type="text" 
+               placeholder="Tìm dịch vụ, bác sĩ..." 
+               class="search-input w-full bg-gray-100 border-none rounded-full py-2 pl-10 pr-4 text-sm focus:ring-2 focus:ring-blue-400 focus:bg-white transition-all outline-none">
+        <div class="search-icon absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors">
+          <i data-lucide="search" style="width:18px;height:18px;"></i>
+        </div>
+      </div>
+
+      <nav class="hidden lg:flex items-center gap-6 flex-shrink-0">
+        <a href="/" class="nav-link text-gray-700 font-600 text-sm hover:text-blue-600">Trang chủ</a>
+        <a href="/services" class="nav-link text-gray-700 font-600 text-sm hover:text-blue-600">Dịch vụ</a>
+        <a href="/booking" class="nav-link text-gray-700 font-600 text-sm hover:text-blue-600">Lịch hẹn</a>
+        {% if user %}
+          <a href="/my-pets" class="nav-link text-blue-600 font-700 text-sm hover:text-blue-700">Thú cưng của tôi</a>
+        {% endif %}
+        
+        <div class="relative group">
+          <button class="nav-link text-gray-700 font-600 text-sm hover:text-blue-600 flex items-center gap-1">
+            Tài khoản <i data-lucide="chevron-down" style="width:14px;height:14px;"></i>
+          </button>
+          <div class="absolute right-0 top-full mt-3 bg-white rounded-2xl shadow-xl py-3 w-64 border border-blue-100 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50">
+            {% if user %}
+              <div class="px-5 pb-3 border-b border-gray-100">
+                <p class="text-xs text-gray-400 mb-1">Xin chào</p>
+                <p class="text-sm font-bold text-blue-600 break-words">{{ user }}</p>
+              </div>
+              <a href="/my-pets" class="block px-4 py-2 text-sm hover:bg-blue-50 flex items-center gap-2">
+                <i data-lucide="dog" style="width:16px;height:16px;"></i> Thú cưng của tôi
+              </a>
+              <a href="/booking" class="block px-4 py-2 text-sm hover:bg-blue-50 flex items-center gap-2">
+                <i data-lucide="calendar" style="width:16px;height:16px;"></i> Lịch hẹn đã đặt
+              </a>
+              <a href="/logout" class="block px-4 py-2 text-sm hover:bg-red-50 text-red-500 border-t border-gray-50 flex items-center gap-2">
+                <i data-lucide="log-out" style="width:16px;height:16px;"></i> Đăng xuất
+              </a>
+            {% else %}
+              <a href="/login-page" class="block px-4 py-2 text-sm hover:bg-blue-50">Đăng nhập</a>
+              <a href="/login-page" class="block px-4 py-2 text-sm hover:bg-blue-50 text-blue-600 font-bold">Đăng ký</a>
+            {% endif %}
+          </div>
+        </div>
+      </nav>
+
+      <button id="mobile-menu-btn" class="lg:hidden text-gray-700">
+        <i data-lucide="menu" style="width:24px;height:24px;"></i>
+      </button>
+    </div>
+
+    <div id="mobile-menu" class="hidden lg:hidden bg-white border-t px-4 py-3 space-y-3">
+      <a href="/" class="block text-gray-700 font-600 text-sm">Trang chủ</a>
+      <a href="/services" class="block text-gray-700 font-600 text-sm">Dịch vụ</a>
+      <a href="/booking" class="block text-gray-700 font-600 text-sm">Lịch hẹn</a>
+      {% if user %}
+        <a href="/my-pets" class="block text-blue-600 font-600 text-sm">Thú cưng của tôi</a>
+        <a href="/logout" class="block text-red-500 font-600 text-sm">Đăng xuất ({{ user }})</a>
+      {% else %}
+        <a href="/login-page" class="block text-blue-600 font-600 text-sm">Đăng nhập / Đăng ký</a>
+      {% endif %}
+    </div>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="bg-gray-800 text-white py-10 mt-10">
+    <div class="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div>
+        <div class="flex items-center gap-2 mb-3"><span class="text-xl">🐾</span> <span class="font-700 text-lg">PetCare</span></div>
+        <p class="text-gray-400 text-sm">Dịch vụ chăm sóc thú cưng chuyên nghiệp, tận tâm.</p>
+      </div>
+      <div>
+        <h4 class="font-700 mb-3">Liên hệ</h4>
+        <p class="text-gray-400 text-sm">📍 123 Đường ABC, Quận 1, TP.HCM</p>
+        <p class="text-gray-400 text-sm">📞 0901 234 567</p>
+      </div>
+      <div>
+        <h4 class="font-700 mb-3">Giờ làm việc</h4>
+        <p class="text-gray-400 text-sm">Thứ 2 - Thứ 7: 8:00 - 20:00</p>
+      </div>
+    </div>
+    <div class="text-center text-gray-500 text-sm mt-8 pt-6 border-t border-gray-700">
+      © 2024 PetCare. Tất cả quyền được bảo lưu.
+    </div>
+  </footer>
+
+  <script>
+    lucide.createIcons();
+    const btn = document.getElementById('mobile-menu-btn');
+    const menu = document.getElementById('mobile-menu');
+    btn.addEventListener('click', () => {
+      menu.classList.toggle('hidden');
+    });
+  </script>
+</body>
+</html>

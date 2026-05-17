@@ -1,0 +1,106 @@
+{% extends "layout_admin.html" %}
+
+{% block admin_content %}
+<div class="max-w-7xl mx-auto space-y-6">
+    <div>
+        <h2 class="text-xl font-black text-slate-800 tracking-tight">Quản lý trạng thái lịch hẹn y tế</h2>
+        <p class="text-xs text-slate-400 mt-0.5">Tiếp nhận, xác nhận phê duyệt hoặc hủy lịch hẹn dịch vụ của khách hàng</p>
+    </div>
+
+    <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+        <form method="GET" action="/admin/appointments" class="flex flex-wrap gap-3 items-center w-full">
+            <div class="relative flex-1 min-w-[200px]">
+                <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+                <input type="text" name="search" value="{{ search_query }}" placeholder="Tìm tên chủ nuôi hoặc tên thú cưng..." class="w-full pl-10 pr-4 py-2 text-xs border rounded-xl focus:outline-none focus:border-blue-500">
+            </div>
+            <select name="status" class="px-3 py-2 text-xs border rounded-xl focus:outline-none focus:border-blue-500 font-bold text-slate-600">
+                <option value="">Tất cả trạng thái</option>
+                <option value="Chờ xử lý" {% if current_status == 'Chờ xử lý' %}selected{% endif %}>Chờ xử lý</option>
+                <option value="Đã xác nhận" {% if current_status == 'Đã xác nhận' %}selected{% endif %}>Đã xác nhận</option>
+                <option value="Đã hủy" {% if current_status == 'Đã hủy' %}selected{% endif %}>Đã hủy</option>
+            </select>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs px-5 py-2 rounded-xl transition-all">Lọc dữ liệu</button>
+        </form>
+    </div>
+
+    <div class="bg-white rounded-xl border border-slate-100 shadow-sm overflow-hidden text-xs">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 text-slate-400 font-bold uppercase border-b border-slate-100">
+                        <th class="py-3.5 px-6">Mã LH</th>
+                        <th class="py-3.5 px-6">Thông tin Khách hàng</th>
+                        <th class="py-3.5 px-6">Thú cưng</th>
+                        <th class="py-3.5 px-6">Dịch vụ & Doanh thu</th>
+                        <th class="py-3.5 px-6">Thời gian hẹn</th>
+                        <th class="py-3.5 px-6">Trạng thái</th>
+                        <th class="py-3.5 px-6 text-center">Hành động duyệt</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-semibold text-slate-600">
+                    {% for lh in appointments %}
+                    <tr class="hover:bg-slate-50/40 transition-colors">
+                        <td class="py-4 px-6 font-bold text-slate-900">#{{ lh.maLH }}</td>
+                        <td class="py-4 px-6">
+                            <div class="font-bold text-slate-800">{{ lh.tenKH }}</div>
+                            <div class="text-[10px] text-slate-400 font-medium">{{ lh.sdt }}</div>
+                        </td>
+                        <td class="py-4 px-6">
+                            <span class="font-bold text-slate-700">{{ lh.tenThuCung }}</span>
+                            <span class="text-[10px] bg-slate-100 px-1.5 py-0.5 rounded text-slate-500 font-medium ml-1">{{ lh.loaiThuCung }}</span>
+                        </td>
+                        <td class="py-4 px-6">
+                            <div class="font-bold text-blue-600">{{ lh.tenDV }}</div>
+                            <div class="text-[10px] text-emerald-600 font-bold">
+                                {% if lh.tongTien is not none and lh.tongTien %}{{ "{:,.0f}".format(lh.tongTien) }}đ{% else %}0đ{% endif %}
+                            </div>
+                        </td>
+                        <td class="py-4 px-6 text-slate-500 font-medium">{{ lh.thoiGian }}</td>
+                        <td class="py-4 px-6">
+                            {% set status = lh.trangThaiLH if lh.trangThaiLH is not none else lh.trangThai %}
+                            
+                            {% if status == 'Chờ xử lý' %}
+                            <span class="px-2.5 py-1 rounded-lg font-bold text-[10px] bg-amber-50 text-amber-600 border border-amber-100">Chờ duyệt</span>
+                            {% elif status == 'Đã xác nhận' or status == 'Hoàn thành' %}
+                            <span class="px-2.5 py-1 rounded-lg font-bold text-[10px] bg-emerald-50 text-emerald-600 border border-emerald-100">Thành công</span>
+                            {% else %}
+                            <span class="px-2.5 py-1 rounded-lg font-bold text-[10px] bg-rose-50 text-rose-600 border border-rose-100">Đã hủy</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-4 px-6 text-center space-x-1">
+                            {% set status = lh.trangThaiLH if lh.trangThaiLH is not none else lh.trangThai %}
+                            
+                            {% if status == 'Chờ xử lý' %}
+                            <button onclick="updateStatus('{{ lh.maLH }}', 'Đã xác nhận')" class="bg-emerald-500 text-white px-2.5 py-1.5 rounded-lg hover:bg-emerald-600 font-bold text-[10px]">Duyệt</button>
+                            <button onclick="updateStatus('{{ lh.maLH }}', 'Đã hủy')" class="bg-rose-500 text-white px-2.5 py-1.5 rounded-lg hover:bg-rose-600 font-bold text-[10px]">Hủy lịch</button>
+                            {% else %}
+                            <span class="text-slate-300 font-medium text-[11px]">Đã chốt sổ</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="7" class="text-center py-10 text-slate-400 font-bold">Không tìm thấy bất kỳ dữ liệu lịch hẹn nào trùng khớp.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function updateStatus(id, status) {
+        if(confirm(`Xác nhận thay đổi lịch hẹn #${id} sang trạng thái [${status}]?`)) {
+            fetch(`/api/admin/appointments/${id}/status`, {
+                method: 'PUT',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ trangThai: status })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(data.message);
+                if(data.status === 'success') window.location.reload();
+            });
+        }
+    }
+</script>
+{% endblock %}

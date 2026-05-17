@@ -1,0 +1,186 @@
+{% extends "layout_admin.html" %}
+
+{% block admin_content %}
+<div class="max-w-7xl mx-auto space-y-6 animate-fade-in text-slate-600 text-xs">
+    
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+        <div>
+            <h2 class="text-xl font-black text-slate-800 tracking-tight flex items-center gap-2">
+                <span class="p-2 bg-slate-50 text-slate-700 rounded-xl border border-slate-100">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"></path>
+                    </svg>
+                </span>
+                Quản lý Hệ sinh thái Thú cưng
+            </h2>
+            <p class="text-xs text-slate-400 mt-1">Tra cứu thông tin sinh học, cân nặng và cấu trúc hồ sơ bệnh án của hệ thống</p>
+        </div>
+        
+        <div class="bg-slate-50 px-4 py-2 rounded-xl border border-slate-100 flex items-center gap-2.5 self-start md:self-center">
+            <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+            <span class="text-xs font-bold text-slate-600">Tổng số hồ sơ: <span class="text-slate-900 font-black">{{ pets|length }}</span></span>
+        </div>
+    </div>
+
+    <div class="bg-white p-4 rounded-xl border border-slate-100 shadow-sm">
+        <form method="GET" action="/admin/pets" class="flex gap-3 items-center w-full">
+            <div class="relative flex-1">
+                <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
+                    </svg>
+                </span>
+                <input type="text" name="search" value="{{ search_query if search_query else '' }}" 
+                       placeholder="Tìm kiếm theo tên thú cưng, giống loài, tên chủ nuôi hoặc số điện thoại..." 
+                       class="w-full pl-11 pr-4 py-3 text-xs border border-slate-200 rounded-xl focus:outline-none focus:border-slate-400 font-semibold text-slate-700 transition-all placeholder:text-slate-400 placeholder:font-normal bg-slate-50/50 focus:bg-white">
+            </div>
+            
+            {% if search_query %}
+            <a href="/admin/pets" class="bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-xs px-5 py-3 rounded-xl transition-all flex items-center justify-center border border-slate-200/60">
+                Xóa bộ lọc
+            </a>
+            {% endif %}
+            
+            <button type="submit" class="bg-slate-900 hover:bg-black text-white font-bold text-xs px-6 py-3 rounded-xl transition-all shadow-sm">
+                Tìm kiếm
+            </button>
+        </form>
+    </div>
+
+    <div class="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50/70 text-slate-400 font-bold uppercase border-b border-slate-100 tracking-wider">
+                        <th class="py-4 px-6 w-24">Mã Bé</th>
+                        <th class="py-4 px-6">Hồ sơ Thú cưng</th>
+                        <th class="py-4 px-6">Chủng loại & Giống</th>
+                        <th class="py-4 px-6">Chỉ số sinh học</th>
+                        <th class="py-4 px-6">Thông tin Chủ nuôi</th>
+                        <th class="py-4 px-6 text-center w-32">Hành động</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100 font-semibold text-slate-600">
+                    {% for pet in pets %}
+                    <tr class="hover:bg-slate-50/40 transition-colors group">
+                        <td class="py-4 px-6 font-bold text-slate-400 group-hover:text-slate-900 transition-colors">
+                            #{{ pet.maTC }}
+                        </td>
+                        
+                        <td class="py-4 px-6">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 shrink-0">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6a7.5 7.5 0 107.5 7.5h-7.5V6z"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 10.5H21A7.5 7.5 0 0013.5 3v7.5z"></path>
+                                    </svg>
+                                </div>
+                                <span class="font-bold text-slate-800 text-sm tracking-tight">{{ pet.ten }}</span>
+                            </div>
+                        </td>
+                        
+                        <td class="py-4 px-6">
+                            <div class="flex flex-col gap-1">
+                                <div>
+                                    <span class="bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-bold text-[10px] uppercase border border-slate-200/50">
+                                        {{ pet.loai }}
+                                    </span>
+                                </div>
+                                <span class="text-slate-400 font-medium text-[11px]">{{ pet.giong if pet.giong else 'Chưa cập nhật giống' }}</span>
+                            </div>
+                        </td>
+                        
+                        <td class="py-4 px-6 text-slate-500 font-medium">
+                            <div class="space-y-1">
+                                <div class="flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"></path>
+                                    </svg>
+                                    <span><span class="text-slate-800 font-bold">{{ pet.tuoi }}</span> tuổi</span>
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v18m0-18L8.25 6.75M12 3l3.75 3.75M12 21l-3.75-3.75M12 21l3.75-3.75"></path>
+                                    </svg>
+                                    <span><span class="text-slate-800 font-bold">{{ pet.canNang }}</span> kg</span>
+                                </div>
+                            </div>
+                        </td>
+                        
+                        <td class="py-4 px-6">
+                            <div class="space-y-1">
+                                <div class="font-bold text-slate-800 flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0zM4.501 20.118a7.5 7.5 0 0114.998 0A17.933 17.933 0 0112 21.75c-2.676 0-5.216-.584-7.499-1.632z"></path>
+                                    </svg>
+                                    {{ pet.tenChuNuoi if pet.tenChuNuoi else 'Chưa gán' }}
+                                </div>
+                                <div class="text-[11px] text-slate-400 font-medium flex items-center gap-1.5">
+                                    <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-1.514 2.018a14.935 14.935 0 01-6.911-6.911l2.018-1.514c.361-.272.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.11-1.004H3.504c-.644 0-1.18.525-1.18 1.169 0 4.756 1.863 9.092 4.885 12.313a14.883 14.883 0 006.315 3.844"></path>
+                                    </svg>
+                                    {{ pet.sdtChuNuoi if pet.sdtChuNuoi else 'N/A' }}
+                                </div>
+                            </div>
+                        </td>
+                        
+                        <td class="py-4 px-6 text-center">
+                            <button onclick="deletePetByAdmin('{{ pet.maTC }}', '{{ pet.ten }}')" 
+                                    class="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-all flex items-center justify-center mx-auto border border-transparent hover:border-rose-100"
+                                    title="Xóa hồ sơ">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-1.8c0-.621-.504-1.114-1.114-1.114H18.5c-.619 0-1.114.504-1.114 1.114v1.8m-2.812 0H15"></path>
+                                </svg>
+                            </button>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-16 text-slate-400 bg-slate-50/20">
+                            <svg class="w-8 h-8 mx-auto text-slate-300 mb-3" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"></path>
+                            </svg>
+                            <div class="font-bold text-slate-700">Không tìm thấy kết quả phù hợp</div>
+                            <div class="text-[11px] text-slate-400 font-normal mt-0.5">Vui lòng thử lại với một từ khóa khác.</div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    function deletePetByAdmin(id, name) {
+        if (confirm(`[CẢNH BÁO ADMIN]: Bạn có chắc chắn muốn xóa vĩnh viễn hồ sơ của bé "${name}" (Mã #${id}) không?\nHành động này không thể hoàn tác!`)) {
+            
+            fetch(`/api/admin/pets/${id}`, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(res => res.json().then(data => ({ status: res.status, body: data })))
+            .then(resData => {
+                alert(resData.body.message);
+                if (resData.status === 200 || resData.body.status === 'success') {
+                    window.location.reload();
+                }
+            })
+            .catch(err => {
+                alert("Đã xảy ra lỗi kết nối đến máy chủ hệ thống!");
+                console.error(err);
+            });
+        }
+    }
+</script>
+
+<style>
+    .animate-fade-in {
+        animation: fadeIn 0.4s ease-out forwards;
+    }
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+{% endblock %}

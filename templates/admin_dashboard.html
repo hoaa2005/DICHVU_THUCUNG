@@ -1,0 +1,102 @@
+{% extends "layout_admin.html" %}
+
+{% block admin_content %}
+<div class="max-w-7xl mx-auto space-y-8">
+    
+    <div>
+        <h2 class="text-2xl font-black text-slate-800 tracking-tight">Thống kê tổng quan</h2>
+        <p class="text-xs text-slate-400 mt-0.5">Số liệu hiệu năng tài chính và trạng thái vận hành của trung tâm</p>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+            <div class="space-y-1">
+                <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Tổng doanh thu</span>
+                <span class="text-2xl font-black text-slate-900">{{ "{:,.0f}".format(thong_ke.doanh_thu) }}đ</span>
+            </div>
+            <div class="w-12 h-12 rounded-xl border border-blue-100 bg-blue-50/50 flex items-center justify-center text-blue-600">
+                <i data-lucide="wallet" class="w-5 h-5 stroke-[1.8]"></i>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+            <div class="space-y-1">
+                <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Lịch hẹn cần xử lý</span>
+                <span class="text-2xl font-black text-slate-900">{{ thong_ke.lich_cho }}</span>
+            </div>
+            <div class="w-12 h-12 rounded-xl border border-amber-100 bg-amber-50/50 flex items-center justify-center text-amber-600">
+                <i data-lucide="clock" class="w-5 h-5 stroke-[1.8]"></i>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+            <div class="space-y-1">
+                <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Tổng tài khoản</span>
+                <span class="text-2xl font-black text-slate-900">{{ thong_ke.tong_kh }}</span>
+            </div>
+            <div class="w-12 h-12 rounded-xl border border-emerald-100 bg-emerald-50/50 flex items-center justify-center text-emerald-600">
+                <i data-lucide="users" class="w-5 h-5 stroke-[1.8]"></i>
+            </div>
+        </div>
+
+        <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-between">
+            <div class="space-y-1">
+                <span class="text-[11px] text-slate-400 font-bold uppercase tracking-wider block">Thú cưng đăng ký</span>
+                <span class="text-2xl font-black text-slate-900">{{ thong_ke.tong_tc }}</span>
+            </div>
+            <div class="w-12 h-12 rounded-xl border border-purple-100 bg-purple-50/50 flex items-center justify-center text-purple-600">
+                <i data-lucide="heart" class="w-5 h-5 stroke-[1.8]"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
+        <div class="p-6 border-b border-slate-50 flex items-center justify-between">
+            <div>
+                <h3 class="text-base font-bold text-slate-800">Yêu cầu đặt lịch mới nhất</h3>
+                <p class="text-xs text-slate-400">Các yêu cầu đặt chỗ cần phân phối nhân viên chăm sóc</p>
+            </div>
+            <span class="text-xs font-bold text-blue-600 bg-blue-50 px-3 py-1 rounded-full">Realtime</span>
+        </div>
+
+        <div class="overflow-x-auto text-sm">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-slate-50 text-slate-400 font-bold text-xs uppercase border-b border-slate-100">
+                        <th class="py-4 px-6">Mã LH</th>
+                        <th class="py-4 px-6">Khách hàng</th>
+                        <th class="py-4 px-6">Thú cưng</th>
+                        <th class="py-4 px-6">Dịch vụ</th>
+                        <th class="py-4 px-6">Thời gian</th>
+                        <th class="py-4 px-6">Trạng thái</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-50 font-medium text-slate-700">
+                    {% for lh in ds_moi %}
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+                        <td class="py-4 px-6 font-bold text-slate-900">#{{ lh.maLH }}</td>
+                        <td class="py-4 px-6">{{ lh.tenKH }}</td>
+                        <td class="py-4 px-6">
+                            <span class="bg-slate-100 text-slate-600 text-xs px-2 py-0.5 rounded-md font-bold mr-1">{{ lh.loaiThuCung }}</span>
+                            {{ lh.tenThuCung }}
+                        </td>
+                        <td class="py-4 px-6 font-bold text-blue-600">{{ lh.tenDV }}</td>
+                        <td class="py-4 px-6 text-slate-500">{{ lh.thoiGian }}</td>
+                        <td class="py-4 px-6">
+                            <span class="px-2.5 py-1 text-[11px] font-bold uppercase rounded-md bg-blue-50 text-blue-600 border border-blue-100">
+                                {{ lh.trangThai }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="text-center py-10 text-slate-400">Hiện tại không có lịch hẹn nào đang chờ xử lý.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}
